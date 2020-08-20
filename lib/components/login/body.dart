@@ -5,7 +5,7 @@ import 'package:flutter_demo/button/rounded_password_field.dart';
 import 'package:flutter_demo/components/login/background.dart';
 import 'package:flutter_demo/constants.dart';
 
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -25,7 +25,7 @@ class BodyState extends State<Body>{
 
     print(userName);
 
-    //SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     final response = await http.post(
         'https://wangpharma.com/pharmalink/API/login.php',
@@ -37,7 +37,7 @@ class BodyState extends State<Body>{
 
       if(jsonResponse['msg'][0] != '0'){
 
-        //prefs.setString("IDuser", jsonResponse['iduser']);
+        prefs.setString("patient_code", jsonResponse['msg']['patient_code']);
 
         Navigator.pushReplacementNamed(context, '/Home');
 

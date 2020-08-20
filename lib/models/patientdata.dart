@@ -1,15 +1,26 @@
-class PatientData {
-  final int patientId;
-  final int patientCode;
-  final String name;
+class Patientdata{
+  final String patientID;
+  final String patientCode;
+  final String patientTitlename;
+  final String patientFirstname;
+  final String patientLastname;
 
-  PatientData ({this.patientId, this.patientCode, this.name});
+  Patientdata({
+    this.patientID,
+    this.patientCode,
+    this.patientTitlename,
+    this.patientFirstname,
+    this.patientLastname,
 
-  factory PatientData .fromJson(Map<String, dynamic> json) {
-    return PatientData (
-      patientId: json['patient_id'],
+  });
+
+  factory Patientdata .fromJson(Map<String, dynamic> json){
+    return new Patientdata(
+      patientID: json['patient_id'],
       patientCode: json['patient_code'],
-      name: json['pti_firstname'],
+      patientTitlename: json['pti_titlename'],
+      patientFirstname: json['pti_firstname'],
+      patientLastname: json['pti_;astname'],
     );
   }
 }
