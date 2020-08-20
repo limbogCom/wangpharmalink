@@ -1,26 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_demo/models/patientdata.dart';
-
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:async';
 import 'package:flutter/services.dart';
 
-Future<PatientData> fetchPatientData() async {
-  final response =
-  await http.get('https://wangpharma.com/pharmalink/API/login.php');
-
-  if (response.statusCode == 200) {
-    // If the server did return a 200 OK response,
-    // then parse the JSON.
-    return PatientData.fromJson(json.decode(response.body));
-  } else {
-    // If the server did not return a 200 OK response,
-    // then throw an exception.
-    throw Exception('Failed to load patient data');
-  }
-}
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Body extends StatefulWidget {
   @override
@@ -32,435 +17,484 @@ class MapScreenState extends State<Body>
   bool _status = true;
   final FocusNode myFocusNode = FocusNode();
 
-  Future<PatientData> futurePatientData;
+  Patientdata patientdata;
+  String patientID ,patientCode , patientTitlename, patientFirstname, patientLastname;
 
+  var userName;
+  var passWord;
+
+  List <Patientdata>patientdataAll = [];
+  String act = "Patientdata";
+
+  _patientdataDB() async {
+    print(userName);
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userName = prefs.getString('Username');
+    passWord = prefs.getString('Password');
+
+    final response = await http.post(
+        'https://wangpharma.com/pharmalink/API/login.php',
+        body: {'Username': userName,'Password': passWord , 'btn_login': '1'});
+
+    if (response.statusCode == 200) {
+      var jsonResponse = json.decode(response.body);
+      //print(jsonResponse);
+
+      if (jsonResponse != null) {
+        jsonResponse.forEach((patientdatas) => patientdataAll.add(Patientdata.fromJson(patientdatas)));
+
+        print(patientdataAll);
+
+        setState(() {
+          return patientdataAll;
+        });
+
+      } else {
+        print('Connect ERROR');
+      }
+    }
+
+  }
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    futurePatientData = fetchPatientData();
+    _patientdataDB();
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-        body: new Container(
-          color: Colors.white,
-          child: new ListView(
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  new Container(
-                    height: 250.0,
-                    color: Colors.white,
-                    child: new Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(top: 20.0),
-                          child: new Stack(fit: StackFit.loose, children: <Widget>[
-                            new Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                new Container(
-                                    width: 140.0,
-                                    height: 140.0,
-                                    decoration: new BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: new DecorationImage(
-                                        image: new ExactAssetImage(
-                                            'assets/images/userpic.png'),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    )),
-                              ],
-                            ),
-                            Padding(
-                                padding: EdgeInsets.only(top: 90.0, right: 100.0),
-                                child: new Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    new CircleAvatar(
-                                      backgroundColor: Colors.red,
-                                      radius: 25.0,
-                                      child: new Icon(
-                                        Icons.camera_alt,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  ],
-                                )),
-                          ]),
-                        )
-                      ],
-                    ),
-                  ),
-                  new Container(
-                    color: Color(0xffFFFFFF),
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 25.0),
+      return new Scaffold(
+          body:
+          new Container(
+            color: Colors.white,
+            child: new ListView(
+              children: <Widget>[
+                Column(
+                  children: <Widget>[
+                    new Container(
+                      height: 250.0,
+                      color: Colors.white,
                       child: new Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
                           Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 0),
-                              child: new Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                mainAxisSize: MainAxisSize.max,
+                            padding: EdgeInsets.only(top: 20.0),
+                            child: new Stack(fit: StackFit.loose, children: <
+                                Widget>[
+                              new Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  new Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
+                                  new Container(
+                                      width: 140.0,
+                                      height: 140.0,
+                                      decoration: new BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: new DecorationImage(
+                                          image: new ExactAssetImage(
+                                              'assets/images/userpic.png'),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )),
+                                ],
+                              ),
+                              Padding(
+                                  padding: EdgeInsets.only(
+                                      top: 90.0, right: 100.0),
+                                  child: new Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
-                                      new Text(
-                                        'ข้อมูลส่วนบุคคล',
-                                        style: TextStyle(
-                                            fontSize: 18.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
+                                      new CircleAvatar(
+                                        backgroundColor: Colors.red,
+                                        radius: 25.0,
+                                        child: new Icon(
+                                          Icons.camera_alt,
+                                          color: Colors.white,
+                                        ),
+                                      )
                                     ],
-                                  ),
-                                  new Column(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      _status ? _getEditIcon() : new Container(),
-                                    ],
-                                  )
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 25.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      new Text(
-                                        'ชื่อ-สกุล:',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 2.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Flexible(
-                                    child: new TextField(
-                                      decoration: const InputDecoration(
-                                        hintText: "กรอกชื่อ-สกุล",
-                                      ),
-                                      enabled: !_status,
-                                      autofocus: !_status,
-
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 25.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      new Text(
-                                        'ประวัติการแพ้ยา',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 2.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Flexible(
-                                    child: new TextField(
-                                      decoration: const InputDecoration(
-                                          hintText: "กรอกประวัติการแพ้ยา"),
-                                      enabled: !_status,
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 25.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      new Text(
-                                        'Line id',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 2.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Flexible(
-                                    child: new TextField(
-                                      decoration: const InputDecoration(
-                                          hintText: "กรอก Line id"),
-                                      enabled: !_status,
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 25.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      new Text(
-                                        'เบอร์โทรศัพท์',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 2.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Flexible(
-                                    child: new TextField(
-                                      decoration: const InputDecoration(
-                                          hintText: "xxx-xxx-xxxx"),
-                                      enabled: !_status,
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 25.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Expanded(
-                                    child: Container(
-                                      child: new Text(
-                                        'วัน/เดือน/ปีเกิด',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      child: new Text(
-                                        'ที่อยู่',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 2.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Flexible(
-                                    child: Padding(
-                                      padding: EdgeInsets.only(right: 10.0),
-                                      child: new TextField(
-                                        decoration: const InputDecoration(
-                                            hintText: "ex.01/11/1995"),
-                                        enabled: !_status,
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                  Flexible(
-                                    child: new TextField(
-                                      decoration: const InputDecoration(
-                                          hintText: "กรอกที่อยู่ปัจจุบัน"),
-                                      enabled: !_status,
-                                    ),
-                                    flex: 2,
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 25.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Expanded(
-                                    child: Container(
-                                      child: new Text(
-                                        'น้ำหนัก',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      child: new Text(
-                                        'ส่วนสูง',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 2.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Flexible(
-                                    child: Padding(
-                                      padding: EdgeInsets.only(right: 10.0),
-                                      child: new TextField(
-                                        decoration: const InputDecoration(
-                                            hintText: "xx kg"),
-                                        enabled: !_status,
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                  Flexible(
-                                    child: new TextField(
-                                      decoration: const InputDecoration(
-                                          hintText: "xxx cm"),
-                                      enabled: !_status,
-                                    ),
-                                    flex: 2,
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 25.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Expanded(
-                                    child: Container(
-                                      child: new Text(
-                                        'กรุ๊ปเลือด',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      child: new Text(
-                                        'ความดัน',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 2.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Flexible(
-                                    child: Padding(
-                                      padding: EdgeInsets.only(right: 10.0),
-                                      child: new TextField(
-                                        decoration: const InputDecoration(
-                                            hintText: "กรอกกรุ๊ปเลือด"),
-                                        enabled: !_status,
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                  Flexible(
-                                    child: new TextField(
-                                      decoration: const InputDecoration(
-                                          hintText: "ค่าบน/ค่าล่าง ex.120/80 mmHg "),
-                                      enabled: !_status,
-                                    ),
-                                    flex: 2,
-                                  ),
-                                ],
-                              )),
-                          !_status ? _getActionButtons() : new Container(),
+                                  )),
+                            ]),
+                          )
                         ],
                       ),
                     ),
-                  )
-                ],
-              ),
-            ],
-          ),
-        ));
-  }
+                    new Container(
+                      color: Color(0xffFFFFFF),
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: 25.0),
+                        child: new Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 0),
+                                child: new Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Column(
+                                      mainAxisAlignment: MainAxisAlignment
+                                          .start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        new Text(
+                                          'ข้อมูลส่วนบุคคล',
+                                          style: TextStyle(
+                                              fontSize: 18.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                    new Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        _status
+                                            ? _getEditIcon()
+                                            : new Container(),
+                                      ],
+                                    )
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 25.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Column(
+                                      mainAxisAlignment: MainAxisAlignment
+                                          .start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        new Text('ชื่อ-สกุล',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 2.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Flexible(
+                                      child: new TextField(
+                                        decoration: const InputDecoration(
+                                          hintText: "กรอกชื่อ-สกุล",
+                                        ),
+                                        enabled: !_status,
+                                        autofocus: !_status,
+
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 25.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Column(
+                                      mainAxisAlignment: MainAxisAlignment
+                                          .start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        new Text(
+                                          'ประวัติการแพ้ยา',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 2.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Flexible(
+                                      child: new TextField(
+                                        decoration: const InputDecoration(
+                                            hintText: "กรอกประวัติการแพ้ยา"),
+                                        enabled: !_status,
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 25.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Column(
+                                      mainAxisAlignment: MainAxisAlignment
+                                          .start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        new Text(
+                                          'Line id',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 2.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Flexible(
+                                      child: new TextField(
+                                        decoration: const InputDecoration(
+                                            hintText: "กรอก Line id"),
+                                        enabled: !_status,
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 25.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Column(
+                                      mainAxisAlignment: MainAxisAlignment
+                                          .start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        new Text(
+                                          'เบอร์โทรศัพท์',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 2.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Flexible(
+                                      child: new TextField(
+                                        decoration: const InputDecoration(
+                                            hintText: "xxx-xxx-xxxx"),
+                                        enabled: !_status,
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 25.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Container(
+                                        child: new Text(
+                                          'วัน/เดือน/ปีเกิด',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      flex: 2,
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        child: new Text(
+                                          'ที่อยู่',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      flex: 2,
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 2.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Flexible(
+                                      child: Padding(
+                                        padding: EdgeInsets.only(right: 10.0),
+                                        child: new TextField(
+                                          decoration: const InputDecoration(
+                                              hintText: "ex.01/11/1995"),
+                                          enabled: !_status,
+                                        ),
+                                      ),
+                                      flex: 2,
+                                    ),
+                                    Flexible(
+                                      child: new TextField(
+                                        decoration: const InputDecoration(
+                                            hintText: "กรอกที่อยู่ปัจจุบัน"),
+                                        enabled: !_status,
+                                      ),
+                                      flex: 2,
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 25.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Container(
+                                        child: new Text(
+                                          'น้ำหนัก',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      flex: 2,
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        child: new Text(
+                                          'ส่วนสูง',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      flex: 2,
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 2.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Flexible(
+                                      child: Padding(
+                                        padding: EdgeInsets.only(right: 10.0),
+                                        child: new TextField(
+                                          decoration: const InputDecoration(
+                                              hintText: "xx kg"),
+                                          enabled: !_status,
+                                        ),
+                                      ),
+                                      flex: 2,
+                                    ),
+                                    Flexible(
+                                      child: new TextField(
+                                        decoration: const InputDecoration(
+                                            hintText: "xxx cm"),
+                                        enabled: !_status,
+                                      ),
+                                      flex: 2,
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 25.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Container(
+                                        child: new Text(
+                                          'กรุ๊ปเลือด',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      flex: 2,
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        child: new Text(
+                                          'ความดัน',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      flex: 2,
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 2.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Flexible(
+                                      child: Padding(
+                                        padding: EdgeInsets.only(right: 10.0),
+                                        child: new TextField(
+                                          decoration: const InputDecoration(
+                                              hintText: "กรอกกรุ๊ปเลือด"),
+                                          enabled: !_status,
+                                        ),
+                                      ),
+                                      flex: 2,
+                                    ),
+                                    Flexible(
+                                      child: new TextField(
+                                        decoration: const InputDecoration(
+                                            hintText: "ค่าบน/ค่าล่าง ex.120/80 mmHg "),
+                                        enabled: !_status,
+                                      ),
+                                      flex: 2,
+                                    ),
+                                  ],
+                                )),
+                            !_status ? _getActionButtons() : new Container(),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            ),
+          )
+      );
+    }
 
   @override
   void dispose() {

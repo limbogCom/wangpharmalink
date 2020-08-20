@@ -1,16 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/components/reminder/druglistDetail.dart';
 import 'package:flutter_demo/constants.dart';
 import 'package:flutter_demo/models/Druglist.dart';
 import 'package:flutter_demo/size.config.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class DruglistCard extends StatelessWidget {
 
   var druglist;
 
-  DruglistCard({Key key, this.druglist}) : super(key: key);
+  DruglistCard({Key key, this.druglist }) : super(key: key);
 
     @override
     Widget build(BuildContext context) {
@@ -27,7 +25,6 @@ class DruglistCard extends StatelessWidget {
               child: ListTile(
                 contentPadding: EdgeInsets.fromLTRB(10, 1, 10, 1),
                 onTap: () {
-
                 },
                 //leading: Image.asset('assets/images/pill.png', fit: BoxFit.cover, width: 60, height: 60,),
                 //leading: Text('${druglist[index].drugTime1}',
@@ -51,7 +48,6 @@ class DruglistCard extends StatelessWidget {
                     icon: Icon(
                       Icons.alarm, color: Colors.orangeAccent, size: 30,),
                     onPressed: () {
-
                     }
                 ),
               ),
@@ -63,3 +59,5 @@ class DruglistCard extends StatelessWidget {
     }
   }
 
+
+  
