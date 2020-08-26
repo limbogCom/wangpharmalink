@@ -537,8 +537,7 @@ class MedicineTypeColumn extends StatelessWidget {
             child: Center(
               child: Padding(
                 padding: EdgeInsets.only(top: 14.0),
-                child: Icon(
-                  IconData(iconValue),
+                child: Icon(Icons.error,
                   size: 75,
                   color: isSelected ? Colors.white : kPrimaryColor,
                 ),

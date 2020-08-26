@@ -16,7 +16,10 @@ class Body extends StatefulWidget {
 }
 
 class BodyState extends State<Body>{
+
+
   var patient_code;
+
   List <druglist>druglistAll = [];
 
   _connectDrug() async {
@@ -46,20 +49,20 @@ class BodyState extends State<Body>{
         print('Connect ERROR');
       }
     }
+
   }
-
-
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _connectDrug();
   }
   @override
   DateTime _dateTime;
+
   Widget build(BuildContext context) {
     // TODO: implement build
+
     return SafeArea(
       child: Background(child: SingleChildScrollView(
         child: Column(
@@ -140,77 +143,126 @@ class BodyState extends State<Body>{
       ),
     );
   }
+  Future notificationSelected(String payload) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text("Notification Clicked $payload"),
+      ),
+    );
+  }
 }
 
 class DruglistCard extends StatelessWidget {
 
   var druglist;
 
+  List statusOrderDrug = [
+    '',
+    'ก่อนอาหาร 30 นาที',
+    'หลังอาหารทันที',
+    'หลังอาหาร 15 นาที',
+    'ขณะท้องว่าง'
+  ];
+
   DruglistCard({Key key, this.druglist }) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    double defaultSize = SizeConfig.defaultSize;
-    // TODO: implement build
-    return AspectRatio(
-      aspectRatio: 0.8,
-      child: ListView.builder(
-        itemBuilder: (context, int index) {
-          return Container(
-            margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-            decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(20)),
-            child: ListTile(
-              contentPadding: EdgeInsets.fromLTRB(10, 1, 10, 1),
-              onTap: () {
-                showDialog(context: context,
-                    builder: (_) => new AlertDialog(
-                      title: new Text('แจ้งเตือนรับประทานยาวันที่ :${druglist[index].drugStart}',style: TextStyle(color: kPrimaryColor)),
-                      content: new Text('${druglist[index].drugName} ครั้งละ ${druglist[index]
-                          .drugDose} ${druglist[index].drugUnitdose} ${druglist[index].drugIndication} '
-                          '${druglist[index].drugDescription}'),
-                      actions: <Widget>[
-                        FlatButton(
-                          child: Text("OK",style: TextStyle(color: kPrimaryColor),),
-                          onPressed: (){ Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    )
-                );
-              },
-              //leading: Image.asset('assets/images/pill.png', fit: BoxFit.cover, width: 60, height: 60,),
-              //leading: Text('${druglist[index].drugTime1}',
-              //  style: TextStyle(color: kPrimaryColor)),
-              leading: Container(
-                padding: EdgeInsets.only(right: 12.0),
-                decoration: new BoxDecoration(
-                    border: new Border(
-                        right: new BorderSide(
-                            width: 1.0, color: Colors.orange))),
-                child: Text('${druglist[index].drugAlert}',
-                    style: TextStyle(color: kPrimaryColor)),
-              ),
-              title: Text('วันที่ ${druglist[index].drugStart}',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis),
-              subtitle: Text(
-                  '${druglist[index].drugName} ครั้งละ ${druglist[index]
-                      .drugDose} ${druglist[index].drugUnitdose}'),
-              trailing: IconButton(
-                  icon: Icon(
-                    Icons.alarm, color: Colors.orangeAccent, size: 30,),
-                  onPressed: () {
-                  }
-              ),
-            ),
-          );
-        },
-        itemCount: druglist != null ? druglist.length : 0,
-      ),
-    );
+  String drugTime1, drugTime2, drugTime3, drugTime4, drugTime5, drugAlert;
+  String showTime;
+
+  setupTime(index, druglist, showTime) async {
+    if (drugTime1 != '00:00:00') {
+      showTime = drugTime1;
+    } else if (drugTime2 != '00:00:00') {
+      showTime = drugTime2;
+    } else if (drugTime3 != '00:00:00') {
+      showTime = drugTime3;
+    } else if (drugTime4 != '00:00:00') {
+      showTime = drugTime4;
+    } else if (drugTime5 != '00:00:00') {
+      showTime = drugTime5;
+    } else {
+      if (drugAlert != '00:00:00') {
+        showTime = drugAlert;
+      } else
+        showTime = '00:00:00';
+    }
+
+    print(showTime);
   }
-}
-
-
+      @override
+      Widget build(BuildContext context) {
+        double defaultSize = SizeConfig.defaultSize;
+        // TODO: implement build
+        return AspectRatio(
+          aspectRatio: 0.8,
+          child: ListView.builder(
+            itemBuilder: (context, int index) {
+              return Container(
+                margin: new EdgeInsets.symmetric(
+                    horizontal: 10.0, vertical: 6.0),
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20)),
+                child: ListTile(
+                  contentPadding: EdgeInsets.fromLTRB(10, 1, 10, 1),
+                  onTap: () {
+                    showDialog(context: context,
+                        builder: (_) =>
+                        new AlertDialog(
+                          title: new Text(
+                              'แจ้งเตือนรับประทานยาวันที่ :${druglist[index]
+                                  .drugStart}', style: TextStyle(
+                              color: kPrimaryColor)),
+                          content: new Text('${druglist[index]
+                              .drugName} ครั้งละ ${druglist[index]
+                              .drugDose} ${druglist[index]
+                              .drugUnitdose} ${druglist[index].drugIndication} '
+                              '${druglist[index]
+                              .drugDescription} ${statusOrderDrug[int.parse(
+                              druglist[index].drugOrder)]}'),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text(
+                                "OK", style: TextStyle(color: kPrimaryColor),),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        )
+                    );
+                  },
+                  //leading: Image.asset('assets/images/pill.png', fit: BoxFit.cover, width: 60, height: 60,),
+                  //leading: Text('${druglist[index].drugTime1}',
+                  //  style: TextStyle(color: kPrimaryColor)),
+                  leading: Container(
+                    padding: EdgeInsets.only(right: 12.0),
+                    decoration: new BoxDecoration(
+                        border: new Border(
+                            right: new BorderSide(
+                                width: 1.0, color: Colors.orange))),
+                    child: Text('$showTime',
+                        style: TextStyle(color: kPrimaryColor)),
+                  ),
+                  title: Text('วันที่ ${druglist[index].drugStart}',
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis),
+                  subtitle: Text(
+                      '${druglist[index].drugName} ครั้งละ ${druglist[index]
+                          .drugDose} ${druglist[index].drugUnitdose}'),
+                  trailing: IconButton(
+                      icon: Icon(
+                        Icons.alarm, color: Colors.orangeAccent, size: 30,),
+                      onPressed: () {}
+                  ),
+                ),
+              );
+            },
+            itemCount: druglist != null ? druglist.length : 0,
+          ),
+        );
+      }
+    }
 

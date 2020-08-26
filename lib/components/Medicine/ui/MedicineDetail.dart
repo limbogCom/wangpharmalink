@@ -187,8 +187,7 @@ class MainSection extends StatelessWidget {
     if (medicine.medicineType == "Bottle") {
       return Hero(
         tag: medicine.medicineName + medicine.medicineType,
-        child: Icon(
-          IconData(0xe900),
+        child: Icon(Icons.error,
           color: kPrimaryColor,
           size: size,
         ),
@@ -196,8 +195,7 @@ class MainSection extends StatelessWidget {
     } else if (medicine.medicineType == "Pill") {
       return Hero(
         tag: medicine.medicineName + medicine.medicineType,
-        child: Icon(
-          IconData(0xe901),
+        child: Icon(Icons.error,
           color: kPrimaryColor,
           size: size,
         ),
@@ -205,8 +203,7 @@ class MainSection extends StatelessWidget {
     } else if (medicine.medicineType == "Syringe") {
       return Hero(
         tag: medicine.medicineName + medicine.medicineType,
-        child: Icon(
-          IconData(0xe902),
+        child: Icon(Icons.error,
           color: kPrimaryColor,
           size: size,
         ),
@@ -214,8 +211,7 @@ class MainSection extends StatelessWidget {
     } else if (medicine.medicineType == "Tablet") {
       return Hero(
         tag: medicine.medicineName + medicine.medicineType,
-        child: Icon(
-          IconData(0xe903),
+        child: Icon(Icons.error,
           color: kPrimaryColor,
           size: size,
         ),
