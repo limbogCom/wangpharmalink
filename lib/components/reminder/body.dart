@@ -5,6 +5,7 @@ import 'package:flutter_demo/components/reminder/druglistCard.dart';
 import 'package:flutter_demo/constants.dart';
 import 'package:flutter_demo/models/Druglist.dart';
 import 'package:flutter_demo/size.config.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -16,7 +17,10 @@ class Body extends StatefulWidget {
 }
 
 class BodyState extends State<Body>{
-
+  FlutterLocalNotificationsPlugin fltrNotification;
+  String _selectedParam;
+  String task;
+  int val;
 
   var patient_code;
 
@@ -59,7 +63,6 @@ class BodyState extends State<Body>{
   }
   @override
   DateTime _dateTime;
-
   Widget build(BuildContext context) {
     // TODO: implement build
 
@@ -165,34 +168,39 @@ class DruglistCard extends StatelessWidget {
     'ขณะท้องว่าง'
   ];
 
+
   DruglistCard({Key key, this.druglist }) : super(key: key);
 
   String drugTime1, drugTime2, drugTime3, drugTime4, drugTime5, drugAlert;
-  String showTime;
+  var showTime;
 
-  setupTime(index, druglist, showTime) async {
-    if (drugTime1 != '00:00:00') {
-      showTime = drugTime1;
-    } else if (drugTime2 != '00:00:00') {
-      showTime = drugTime2;
-    } else if (drugTime3 != '00:00:00') {
-      showTime = drugTime3;
-    } else if (drugTime4 != '00:00:00') {
-      showTime = drugTime4;
-    } else if (drugTime5 != '00:00:00') {
-      showTime = drugTime5;
+  setupTime(druglist) async {
+    if (druglist.drugTime1 != "00:00:00") {
+      showTime = druglist.drugTime1;
+    } else if (druglist.drugTime2 != '00:00:00') {
+      showTime = druglist.drugTime2;
+    } else if (druglist.drugTime3 != '00:00:00') {
+      showTime = druglist.drugTime3;
+    } else if (druglist.drugTime4 != '00:00:00') {
+      showTime = druglist.drugTime4;
+    } else if (druglist.drugTime5 != '00:00:00') {
+      showTime = druglist.drugTime5;
     } else {
-      if (drugAlert != '00:00:00') {
-        showTime = drugAlert;
+      if (druglist.drugAlert != '00:00:00') {
+        showTime = druglist.drugAlert;
       } else
         showTime = '00:00:00';
     }
 
     print(showTime);
+    return showTime.toString();
   }
+
+
       @override
       Widget build(BuildContext context) {
         double defaultSize = SizeConfig.defaultSize;
+
         // TODO: implement build
         return AspectRatio(
           aspectRatio: 0.8,
@@ -210,24 +218,36 @@ class DruglistCard extends StatelessWidget {
                     showDialog(context: context,
                         builder: (_) =>
                         new AlertDialog(
-                          title: new Text(
-                              'แจ้งเตือนรับประทานยาวันที่ :${druglist[index]
-                                  .drugStart}', style: TextStyle(
-                              color: kPrimaryColor)),
-                          content: new Text('${druglist[index]
-                              .drugName} ครั้งละ ${druglist[index]
-                              .drugDose} ${druglist[index]
-                              .drugUnitdose} ${druglist[index].drugIndication} '
+                          title:
+                          new Text(
                               '${druglist[index]
-                              .drugDescription} ${statusOrderDrug[int.parse(
+                                  .drugName}', style: TextStyle(
+                              color: kPrimaryColor, fontSize: 20 , fontWeight: FontWeight.w700), textAlign: TextAlign.center),
+                          content: new Text('ครั้งละ ${druglist[index]
+                              .drugDose} ${druglist[index]
+                              .drugUnitdose}'
+                                '  ${statusOrderDrug[int.parse(
                               druglist[index].drugOrder)]}'),
                           actions: <Widget>[
                             FlatButton(
                               child: Text(
-                                "OK", style: TextStyle(color: kPrimaryColor),),
+                                "Skip", style: TextStyle(color: kPrimaryColor, fontSize: 16),),
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
+                            ),
+                            SizedBox(
+                              width: 50,
+                            ),
+                            FlatButton(
+                              child: Text(
+                                "Take", style: TextStyle(color: kPrimaryColor, fontSize: 16),),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            SizedBox(
+                              width: 20,
                             ),
                           ],
                         )
@@ -242,8 +262,8 @@ class DruglistCard extends StatelessWidget {
                         border: new Border(
                             right: new BorderSide(
                                 width: 1.0, color: Colors.orange))),
-                    child: Text('$showTime',
-                        style: TextStyle(color: kPrimaryColor)),
+                    child: Text(setupTime(druglist).toString(),
+                       ),
                   ),
                   title: Text('วันที่ ${druglist[index].drugStart}',
                       style: TextStyle(
